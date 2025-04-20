@@ -1,36 +1,98 @@
-import os
-import json
+import requests
 
-# 루트 디렉토리 경로 (본인이 만든 폴더)
-base_dir = r"C:\Users\공Dok2\OneDrive\설광석\깃데스크톱\Pandas_study"
+NOTION_TOKEN = "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"
+PARENT_PAGE_ID = "1db7bdaba1c980429bc9de1961b43f55"
 
-# 폴더와 해당 폴더에 들어갈 ipynb 파일명 리스트
-structure = {
-    "00_setup": [],
-    "01_basics": ["01_series.ipynb", "02_dataframe.ipynb", "03_indexing.ipynb"],
-    "02_analysis": ["01_filtering.ipynb", "02_groupby.ipynb", "03_merge_join.ipynb", "04_pivot.ipynb"],
-    "03_visualization": ["01_plotting.ipynb"],
-    "04_projects/telecom_churn": [],
-    "04_projects/uk_crime_analysis": [],
-    "notes": [],
+headers = {
+    "Authorization": f"Bearer {NOTION_TOKEN}",
+    "Content-Type": "application/json",
+    "Notion-Version": "2022-06-28"
 }
 
-# .ipynb 파일의 기본 내용 (빈 Jupyter 노트북)
-empty_notebook = {
-    "cells": [],
-    "metadata": {},
-    "nbformat": 4,
-    "nbformat_minor": 2
-}
+def create_notion_page(title, content_blocks):
+    url = "https://api.notion.com/v1/pages"
+    data = {
+        "parent": {"page_id": PARENT_PAGE_ID},
+        "properties": {
+            "title": {
+                "title": [{"type": "text", "text": {"content": title}}]
+            }
+        },
+        "children": content_blocks
+    }
+    response = requests.post(url, headers=headers, json=data)
+    print("✅ 상태 코드:", response.status_code)
+    print(response.json())
 
-# 폴더 및 파일 생성
-for folder, notebooks in structure.items():
-    folder_path = os.path.join(base_dir, folder)
-    os.makedirs(folder_path, exist_ok=True)
-    for notebook in notebooks:
-        notebook_path = os.path.join(folder_path, notebook)
-        if not os.path.exists(notebook_path):
-            with open(notebook_path, "w", encoding="utf-8") as f:
-                json.dump(empty_notebook, f)
-            print
+title = "📘 Pandas 1강: Series"
+
+content_blocks = [
+    {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+            "rich_text": [{"type": "text", "text": {"content": "📌 Pandas Series란?"}}]
+        }
+    },
+    {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [{"type": "text", "text": {
+                "content": "Series는 Pandas의 1차원 데이터 구조로, 인덱스를 가진 리스트처럼 생각하면 됩니다."}}]
+        }
+    },
+    {
+        "object": "block",
+        "type": "heading_3",
+        "heading_3": {
+            "rich_text": [{"type": "text", "text": {"content": "✅ 기본 생성"}}]
+        }
+    },
+    {
+        "object": "block",
+        "type": "code",
+        "code": {
+            "rich_text": [{"type": "text", "text": {"content": "import pandas as pd\ns = pd.Series([10, 20, 30, 40])\nprint(s)"}}],
+            "language": "python"
+        }
+    },
+    {
+        "object": "block",
+        "type": "heading_3",
+        "heading_3": {
+            "rich_text": [{"type": "text", "text": {"content": "✅ 인덱스 지정"}}]
+        }
+    },
+    {
+        "object": "block",
+        "type": "code",
+        "code": {
+            "rich_text": [{"type": "text", "text": {"content": "s2 = pd.Series([100, 200, 300], index=['a', 'b', 'c'])\nprint(s2)"}}],
+            "language": "python"
+        }
+    },
+    {
+        "object": "block",
+        "type": "heading_3",
+        "heading_3": {
+            "rich_text": [{"type": "text", "text": {"content": "✅ 값 접근과 평균 계산"}}]
+        }
+    },
+    {
+        "object": "block",
+        "type": "code",
+        "code": {
+            "rich_text": [{"type": "text", "text": {
+                "content": "print(s2['b'])      # 인덱스로 접근\nprint(s2[0])        # 순서로 접근\nprint(s2.mean())    # 평균"}}],
+            "language": "python"
+        }
+    }
+]
+
+create_notion_page(title, content_blocks)
+
+
+
+
 
